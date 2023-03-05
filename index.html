@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Whiteboard filter image</title>
+  </head>
+  <style>
+    .container {
+      max-width: 90vw;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 70%;
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div id="original">
+        <h3>original</h3>
+        <img src="image.webp" width="100%" height="70%" />
+      </div>
+      <div>
+        <h3>Output</h3>
+        <canvas id="canvas">
+          <p>No canvas support!</p>
+        </canvas>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      window.onload = function () {
+        var canvas = document.getElementById("canvas");
+        context = canvas.getContext("2d");
+        var finalImage;
+        var image = new Image();
+        image.src = "image.webp" + "?" + new Date().getTime();
+        image.setAttribute("crossOrigin", "");
+        image.crossOrigin = "Anonymous";
+        image.onload = function () {
+          canvas.width = image.width;
+          canvas.height = image.height;
+
+          var imageX = 0;
+          var imageY = 0;
+
+          context.drawImage(image, imageX, imageY);
+          var imageData = context.getImageData(
+            imageX,
+            imageY,
+            image.width,
+            image.height
+          );
+          var dataArr = imageData.data;
+          console.log("data arr", dataArr);
+          for (var i = 0; i < dataArr.length; i += 4) {
+            var r = dataArr[i];
+            var g = dataArr[i + 1];
+            var b = dataArr[i + 2];
+            var a = dataArr[i + 3];
+            var invertedRed = 255 - r;
+            var invertedGreen = 255 - g;
+            var invertedBlue = 255 - b;
+            if (r + g + b > 255) {
+              dataArr[i + 3] = 0;
+            } else {
+              dataArr[i + 3] = 255;
+            }
+          }
+          context.filter = "url(#sharpen)";
+          context.globalCompositeOperation = "source-over";
+          context.putImageData(imageData, imageX, imageY);
+        };
+      };
+    </script>
+  </body>
+</html>
